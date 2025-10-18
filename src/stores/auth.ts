@@ -1,17 +1,9 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-
-export interface User {
-  id: number
-  login: string
-  name: string
-  email: string
-  avatar_url: string
-  html_url: string
-}
+import type { GitHubUser } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
+  const user = ref<GitHubUser | null>(null)
   const token = ref<string | null>(null)
   const isLoading = ref(false)
 
@@ -32,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const setAuth = (userData: User, authToken: string) => {
+  const setAuth = (userData: GitHubUser, authToken: string) => {
     user.value = userData
     token.value = authToken
 
