@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+console.log('github login page')
 </script>
 
 <template>
-  <RouterView />
+  <h1>github login</h1>
 </template>
