@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <!-- Header -->
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="flex justify-center">
         <div class="text-2xl font-bold text-gray-900">GitHub</div>
@@ -8,17 +7,11 @@
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
         Sign in to your account
       </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Or
-        <a href="#" class="font-medium text-blue-600 hover:text-blue-500"> create a new account </a>
-      </p>
     </div>
 
-    <!-- Login Form -->
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
         <form class="space-y-6">
-          <!-- Username/Email Field -->
           <div>
             <label for="username" class="block text-sm font-medium text-gray-700">
               Username or email address
@@ -36,7 +29,6 @@
             </div>
           </div>
 
-          <!-- Password Field -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700"> Password </label>
             <div class="mt-1">
@@ -52,7 +44,6 @@
             </div>
           </div>
 
-          <!-- Remember me and Forgot password -->
           <div class="flex items-center justify-between">
             <div class="flex items-center">
               <input
@@ -73,7 +64,6 @@
             </div>
           </div>
 
-          <!-- Sign in button -->
           <div>
             <button
               type="submit"
@@ -84,51 +74,14 @@
           </div>
         </form>
 
-        <!-- Divider -->
         <div class="mt-6">
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
               <div class="w-full border-t border-gray-300" />
             </div>
-            <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
           </div>
-
-          <!-- Social login buttons -->
-          <div class="mt-6 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 ease-in-out"
-            >
-              Google
-            </button>
-            <button
-              type="button"
-              class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 ease-in-out"
-            >
-              Microsoft
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer links -->
-      <div class="mt-6 text-center">
-        <div class="text-sm text-gray-600">
-          <a href="#" class="hover:text-gray-500">Terms</a>
-          <span class="mx-2">•</span>
-          <a href="#" class="hover:text-gray-500">Privacy</a>
-          <span class="mx-2">•</span>
-          <a href="#" class="hover:text-gray-500">Security</a>
-          <span class="mx-2">•</span>
-          <a href="#" class="hover:text-gray-500">Contact GitHub</a>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-// No logic needed for now - just UI
-</script>
