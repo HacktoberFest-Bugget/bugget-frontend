@@ -128,8 +128,10 @@
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Repositories -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-200">
-          <div class="flex items-center justify-between">
+        <div
+          class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-200 relative repositories-dropdown"
+        >
+          <div class="flex items-center justify-between cursor-pointer" @click="toggleRepositories">
             <div>
               <p class="text-sm font-medium text-gray-500 mb-1">Repositories</p>
               <p class="text-3xl font-bold text-gray-900">{{ typedUser?.public_repos || 0 }}</p>
@@ -148,6 +150,154 @@
                   d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 ></path>
               </svg>
+            </div>
+          </div>
+
+          <!-- Repositories Dropdown -->
+          <div
+            v-if="showRepositories"
+            class="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto w-[600px]"
+          >
+            <div class="p-4">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Your Repositories</h3>
+                <button @click="toggleRepositories" class="text-gray-400 hover:text-gray-600">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Loading State -->
+              <div v-if="loadingRepositories" class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3 text-gray-600">Loading repositories...</span>
+              </div>
+
+              <!-- Repositories List -->
+              <div v-else-if="repositories.length > 0" class="space-y-3">
+                <div
+                  v-for="repo in repositories"
+                  :key="repo.id"
+                  class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <div class="flex-1 min-w-0 mr-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center space-x-3">
+                        <h4 class="text-base font-semibold text-gray-900">{{ repo.name }}</h4>
+                        <span
+                          v-if="repo.private"
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                        >
+                          Private
+                        </span>
+                        <span
+                          v-else
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        >
+                          Public
+                        </span>
+                      </div>
+                    </div>
+                    <p v-if="repo.description" class="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {{ repo.description }}
+                    </p>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center space-x-6 text-sm text-gray-500">
+                        <span v-if="repo.language" class="flex items-center">
+                          <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                          <span class="font-medium">{{ repo.language }}</span>
+                        </span>
+                        <span class="flex items-center">
+                          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fill-rule="evenodd"
+                              d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0113 14H6a3 3 0 01-3-3V6z"
+                              clip-rule="evenodd"
+                            ></path>
+                          </svg>
+                          <span class="font-medium">{{ repo.forks_count }}</span>
+                          <span class="ml-1 text-gray-400">forks</span>
+                        </span>
+                        <span class="flex items-center">
+                          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                            ></path>
+                          </svg>
+                          <span class="font-medium">{{ repo.stargazers_count }}</span>
+                          <span class="ml-1 text-gray-400">stars</span>
+                        </span>
+                      </div>
+                      <div class="flex items-center text-sm text-gray-500">
+                        <svg
+                          class="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path>
+                        </svg>
+                        <span>{{ formatDate(repo.updated_at) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <a
+                      :href="repo.html_url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        ></path>
+                      </svg>
+                      View Repository
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-else class="text-center py-8">
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  ></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No repositories found</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                  This user doesn't have any public repositories.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -350,13 +500,73 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import type { GitHubUser } from '@/types'
+import axios from 'axios'
 
 const { user, logout } = useAuth()
 
 // Type assertion to ensure proper typing
 const typedUser = user as Readonly<GitHubUser | null>
+
+// Repository interface
+interface Repository {
+  id: number
+  name: string
+  full_name: string
+  description: string | null
+  private: boolean
+  html_url: string
+  language: string | null
+  stargazers_count: number
+  forks_count: number
+  updated_at: string
+  created_at: string
+}
+
+// Repository dropdown state
+const showRepositories = ref(false)
+const repositories = ref<Repository[]>([])
+const loadingRepositories = ref(false)
+
+// Toggle repositories dropdown
+const toggleRepositories = async () => {
+  showRepositories.value = !showRepositories.value
+
+  // Fetch repositories when opening dropdown
+  if (showRepositories.value && repositories.value.length === 0) {
+    await fetchRepositories()
+  }
+}
+
+// Fetch user repositories
+const fetchRepositories = async () => {
+  if (!typedUser?.login) return
+
+  loadingRepositories.value = true
+
+  try {
+    const response = await axios.get(`https://api.github.com/users/${typedUser.login}/repos`, {
+      params: {
+        sort: 'updated',
+        per_page: 20,
+        type: 'all', // Include both public and private repos if user has access
+      },
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    })
+
+    repositories.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch repositories:', error)
+    repositories.value = []
+  } finally {
+    loadingRepositories.value = false
+  }
+}
 
 // Format date helper function
 const formatDate = (dateString: string | undefined): string => {
@@ -373,4 +583,21 @@ const formatDate = (dateString: string | undefined): string => {
     return 'Invalid date'
   }
 }
+
+// Close dropdown when clicking outside
+onMounted(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (!target.closest('.repositories-dropdown')) {
+      showRepositories.value = false
+    }
+  }
+
+  document.addEventListener('click', handleClickOutside)
+
+  // Cleanup
+  return () => {
+    document.removeEventListener('click', handleClickOutside)
+  }
+})
 </script>
