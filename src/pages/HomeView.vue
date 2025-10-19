@@ -1072,7 +1072,7 @@ const fetchUserKey = async () => {
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/me',
       {
         params: {
-          email: typedUser?.email || 'omar.jangavadze11@gmail.com',
+email:'omar.jangavadze11@gmail.com',
         },
         headers: {
           'ngrok-skip-browser-warning': '1',
@@ -1095,10 +1095,12 @@ const generateUserKey = async () => {
 
   generatingKey.value = true
   try {
+    
+    
     await axios.post(
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/generate-key',
       {
-        email: typedUser?.email || typedUser?.login || '', // Use actual user's email or login
+        email: 'omar.jangavadze11@gmail.com' // Use actual user's email or login
       },
       {
         headers: {
