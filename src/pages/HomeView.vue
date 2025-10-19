@@ -18,7 +18,7 @@
               <h1
                 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent"
               >
-                Bugget
+                GitTales
               </h1>
             </div>
           </div>
@@ -82,6 +82,97 @@
             <div class="flex-1 text-white">
               <h3 class="text-2xl font-bold mb-2">{{ typedUser?.name || typedUser?.login }}</h3>
               <p class="text-blue-100 mb-4">@{{ typedUser?.login }}</p>
+
+              <!-- User Key Section in Purple Card -->
+              <div class="mb-4 flex items-center space-x-3">
+                <span class="text-blue-100 text-sm">Key:</span>
+                <div class="flex items-center space-x-2">
+                  <span v-if="loadingUserKey" class="text-blue-100 text-sm">Loading...</span>
+                  <div v-else-if="userKey" class="flex items-center space-x-2">
+                    <div class="relative">
+                      <input
+                        :type="showPassword ? 'text' : 'password'"
+                        :value="userKey"
+                        readonly
+                        class="text-sm font-mono text-white bg-blue-500 bg-opacity-30 px-3 py-1 rounded border border-blue-300 pr-20 min-w-[200px]"
+                      />
+                      <button
+                        @click="showPassword = !showPassword"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors duration-200 p-1 rounded hover:bg-white/10"
+                        type="button"
+                        title="Toggle password visibility"
+                      >
+                        <svg
+                          v-if="showPassword"
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                          ></path>
+                        </svg>
+                        <svg
+                          v-else
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          ></path>
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          ></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <button
+                      @click="copyUserKey"
+                      class="text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg border border-white/30"
+                      title="Copy key to clipboard"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </button>
+                    <button
+                      @click="generateUserKey"
+                      :disabled="generatingKey"
+                      class="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {{ generatingKey ? 'Regenerating...' : 'Regenerate Key' }}
+                    </button>
+                  </div>
+                  <div v-else class="flex items-center space-x-2">
+                    <span class="text-blue-100 text-sm">No key</span>
+                    <button
+                      @click="generateUserKey"
+                      :disabled="generatingKey"
+                      class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {{ generatingKey ? 'Generating...' : 'Generate Key' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <p v-if="typedUser?.bio" class="text-blue-100 text-lg mb-4">{{ typedUser.bio }}</p>
               <div class="flex items-center space-x-6">
                 <div v-if="typedUser?.location" class="flex items-center space-x-2">
@@ -134,7 +225,13 @@
           <div class="flex items-center justify-between cursor-pointer" @click="toggleRepositories">
             <div>
               <p class="text-sm font-medium text-gray-500 mb-1">Repositories</p>
-              <p class="text-3xl font-bold text-gray-900">{{ typedUser?.public_repos || 0 }}</p>
+              <p class="text-3xl font-bold text-gray-900">
+                <span
+                  v-if="loadingRepositories"
+                  class="inline-block w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"
+                ></span>
+                <span v-else>{{ repositories.length || 0 }}</span>
+              </p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg
@@ -719,6 +816,12 @@ const selectedFileContent = ref('')
 const selectedFileName = ref('')
 const loadingFileContent = ref(false)
 
+// User key state
+const userKey = ref('')
+const loadingUserKey = ref(false)
+const generatingKey = ref(false)
+const showPassword = ref(false)
+
 // Computed property to render markdown content
 const renderedFileContent = computed(() => {
   if (!selectedFileContent.value) return ''
@@ -740,6 +843,12 @@ interface RepositoryFile {
   downloadUrl?: string
 }
 
+// API response file interface
+interface ApiFileResponse {
+  id: string
+  filename: string
+}
+
 // Toggle repositories dropdown
 const toggleRepositories = async () => {
   showRepositories.value = !showRepositories.value
@@ -750,14 +859,14 @@ const toggleRepositories = async () => {
   }
 }
 
-// Fetch user repositories
+// Fetch organization repositories
 const fetchRepositories = async () => {
   if (!typedUser?.login) return
 
   loadingRepositories.value = true
 
   try {
-    const response = await axios.get(`https://api.github.com/users/${typedUser.login}/repos`, {
+    const response = await axios.get(`https://api.github.com/orgs/HacktoberFest-Bugget/repos`, {
       params: {
         sort: 'updated',
         per_page: 20,
@@ -791,15 +900,23 @@ const fetchRepositoryFiles = async () => {
 
   try {
     // Call your actual backend endpoint to get list of docs
-    const response = await axios.get('http://localhost:3001/documentation')
+    const response = await axios.get(
+      'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/documentation',
+      {
+        headers: {
+          'ngrok-skip-browser-warning': '1',
+          'x-api-key': userKey.value,
+        },
+      },
+    )
 
     // Transform the file list into our expected format
-    repositoryFiles.value = response.data.map((file: any, index: number) => ({
+    repositoryFiles.value = response.data.map((file: ApiFileResponse) => ({
       id: file.id,
       name: file.filename,
       description: `Documentation file: ${file.filename}`,
       lastModified: new Date().toISOString(),
-      downloadUrl: `http://localhost:3001/documentation/${file.id}`,
+      downloadUrl: `https://preindustrial-hiedi-spotlessly.ngrok-free.dev/documentation/${file.id}`,
     }))
   } catch (error) {
     console.error('Failed to fetch repository files:', error)
@@ -885,7 +1002,12 @@ const viewFileContent = async (file: RepositoryFile) => {
 
     if (file.downloadUrl) {
       // Fetch actual content from your backend
-      const response = await axios.get(file.downloadUrl)
+      const response = await axios.get(file.downloadUrl, {
+        headers: {
+          'ngrok-skip-browser-warning': '1',
+          'x-api-key': userKey.value,
+        },
+      })
       content = response.data
     } else {
       // Fallback: mock content
@@ -916,6 +1038,79 @@ const formatDate = (dateString: string | undefined): string => {
     return 'Invalid date'
   }
 }
+
+// Fetch user key from backend
+const fetchUserKey = async () => {
+  if (!typedUser?.login) return
+
+  loadingUserKey.value = true
+  try {
+    const response = await axios.get(
+      'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/me',
+      {
+        params: {
+          email: 'omar.jangavadze11@gmail.com', // Use actual email address
+        },
+        headers: {
+          'ngrok-skip-browser-warning': '1',
+        },
+      },
+    )
+    userKey.value = response.data.key || ''
+  } catch (error) {
+    console.error('Failed to fetch user key:', error)
+    // If key doesn't exist (404), set empty string to show Generate button
+    userKey.value = ''
+  } finally {
+    loadingUserKey.value = false
+  }
+}
+
+// Generate new user key
+const generateUserKey = async () => {
+  if (!typedUser?.login) return
+
+  generatingKey.value = true
+  try {
+    await axios.post(
+      'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/generate-key',
+      {
+        email: 'omar.jangavadze11@gmail.com', // Use GitHub username as email identifier
+      },
+      {
+        headers: {
+          'ngrok-skip-browser-warning': '1',
+        },
+      },
+    )
+    await fetchUserKey()
+  } catch (error) {
+    console.error('Failed to generate user key:', error)
+    alert('Failed to generate user key. Please try again.')
+  } finally {
+    generatingKey.value = false
+  }
+}
+
+// Copy user key to clipboard
+const copyUserKey = async () => {
+  if (!userKey.value) return
+
+  try {
+    await navigator.clipboard.writeText(userKey.value)
+    // You could add a toast notification here if you have one
+    alert('Key copied to clipboard!')
+  } catch (error) {
+    console.error('Failed to copy key:', error)
+    alert('Failed to copy key to clipboard')
+  }
+}
+
+// Check if user key exists and fetch repositories on component mount
+onMounted(() => {
+  fetchUserKey()
+  fetchRepositories()
+})
 
 // No outside click handler needed - repositories dropdown only closes when clicking the card itself
 </script>
