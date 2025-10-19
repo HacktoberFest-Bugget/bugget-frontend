@@ -732,7 +732,7 @@
     <!-- File Content Modal -->
     <div
       v-if="showFileContentModal"
-      class="fixed inset-0 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/30"
       @click="closeAllModals"
     >
       <div
@@ -1072,7 +1072,7 @@ const fetchUserKey = async () => {
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/me',
       {
         params: {
-email:'omar.jangavadze11@gmail.com',
+          email: 'omar.jangavadze11@gmail.com',
         },
         headers: {
           'ngrok-skip-browser-warning': '1',
@@ -1095,12 +1095,10 @@ const generateUserKey = async () => {
 
   generatingKey.value = true
   try {
-    
-    
     await axios.post(
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/generate-key',
       {
-        email: 'omar.jangavadze11@gmail.com' // Use actual user's email or login
+        email: 'omar.jangavadze11@gmail.com', // Use actual user's email or login
       },
       {
         headers: {
