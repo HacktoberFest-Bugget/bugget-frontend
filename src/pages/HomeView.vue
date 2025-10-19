@@ -253,10 +253,8 @@
                     </div>
                   </div>
                   <div class="flex-shrink-0">
-                    <a
-                      :href="repo.html_url"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      @click="viewRepositoryFiles(repo.name)"
                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
                     >
                       <svg
@@ -269,11 +267,11 @@
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         ></path>
                       </svg>
-                      View Repository
-                    </a>
+                      View Files
+                    </button>
                   </div>
                 </div>
               </div>
@@ -496,14 +494,193 @@
         </div>
       </div>
     </div>
+
+    <!-- Files Modal -->
+    <div
+      v-if="showFilesModal"
+      class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+      @click="closeAllModals"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+        @click.stop
+      >
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900">Repository Files</h3>
+            <p class="text-sm text-gray-600 mt-1">{{ selectedRepository }}</p>
+          </div>
+          <button @click="closeFilesModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-6">
+          <!-- Loading State -->
+          <div v-if="loadingFiles" class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="ml-3 text-gray-600">Loading files...</span>
+          </div>
+
+          <!-- Files List -->
+          <div v-else-if="repositoryFiles.length > 0" class="space-y-3">
+            <div
+              v-for="file in repositoryFiles"
+              :key="file.id"
+              class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg
+                    class="w-5 h-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-900">{{ file.name }}</h4>
+                  <p class="text-xs text-gray-500">
+                    Last modified: {{ formatDate(file.lastModified) }}
+                  </p>
+                  <p v-if="file.description" class="text-xs text-gray-600 mt-1">
+                    {{ file.description }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="downloadFile(file)"
+                  class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors duration-200"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  Download
+                </button>
+                <button
+                  @click="viewFileContent(file)"
+                  class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                  View
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="text-center py-12">
+            <svg
+              class="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No files found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              No MD files with changes found for this repository.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Content Modal -->
+    <div
+      v-if="showFileContentModal"
+      class="fixed inset-0 flex items-center justify-center z-50 p-4"
+      @click="closeAllModals"
+    >
+      <div
+        class="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+        @click.stop
+      >
+        <div class="flex items-center justify-between p-6 border-b border-gray-700">
+          <div>
+            <h3 class="text-xl font-semibold text-white">File Content</h3>
+            <p class="text-sm text-gray-400 mt-1">{{ selectedFileName }}</p>
+          </div>
+          <button
+            @click="closeFileContentModal"
+            class="text-gray-400 hover:text-white transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-6">
+          <!-- Loading State -->
+          <div v-if="loadingFileContent" class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+            <span class="ml-3 text-gray-300">Loading file content...</span>
+          </div>
+
+          <!-- File Content -->
+          <div v-else class="max-h-96 overflow-y-auto">
+            <div
+              class="prose prose-invert prose-sm max-w-none p-6 bg-gray-800 rounded-lg text-gray-200"
+              v-html="renderedFileContent"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import type { GitHubUser } from '@/types'
 import axios from 'axios'
+import { marked } from 'marked'
 
 const { user, logout } = useAuth()
 
@@ -529,6 +706,39 @@ interface Repository {
 const showRepositories = ref(false)
 const repositories = ref<Repository[]>([])
 const loadingRepositories = ref(false)
+
+// Files modal state
+const showFilesModal = ref(false)
+const selectedRepository = ref('')
+const repositoryFiles = ref<RepositoryFile[]>([])
+const loadingFiles = ref(false)
+
+// File content modal state
+const showFileContentModal = ref(false)
+const selectedFileContent = ref('')
+const selectedFileName = ref('')
+const loadingFileContent = ref(false)
+
+// Computed property to render markdown content
+const renderedFileContent = computed(() => {
+  if (!selectedFileContent.value) return ''
+  try {
+    return marked(selectedFileContent.value)
+  } catch (error) {
+    console.error('Error rendering markdown:', error)
+    return selectedFileContent.value
+  }
+})
+
+// Repository file interface
+interface RepositoryFile {
+  id: string
+  name: string
+  description?: string
+  lastModified: string
+  content?: string
+  downloadUrl?: string
+}
 
 // Toggle repositories dropdown
 const toggleRepositories = async () => {
@@ -568,6 +778,129 @@ const fetchRepositories = async () => {
   }
 }
 
+// View repository files
+const viewRepositoryFiles = async (repoName: string) => {
+  selectedRepository.value = repoName
+  showFilesModal.value = true
+  await fetchRepositoryFiles()
+}
+
+// Fetch repository files from backend
+const fetchRepositoryFiles = async () => {
+  loadingFiles.value = true
+
+  try {
+    // Call your actual backend endpoint to get list of docs
+    const response = await axios.get('http://localhost:3001/documentation')
+
+    // Transform the file list into our expected format
+    repositoryFiles.value = response.data.map((file: any, index: number) => ({
+      id: file.id,
+      name: file.filename,
+      description: `Documentation file: ${file.filename}`,
+      lastModified: new Date().toISOString(),
+      downloadUrl: `http://localhost:3001/documentation/${file.id}`,
+    }))
+  } catch (error) {
+    console.error('Failed to fetch repository files:', error)
+
+    // Fallback to empty array if API fails
+    repositoryFiles.value = []
+  } finally {
+    loadingFiles.value = false
+  }
+}
+
+// Close files modal
+const closeFilesModal = () => {
+  showFilesModal.value = false
+  selectedRepository.value = ''
+  repositoryFiles.value = []
+}
+
+// Close file content modal and reopen repository files modal
+const closeFileContentModal = () => {
+  showFileContentModal.value = false
+  selectedFileContent.value = ''
+  selectedFileName.value = ''
+  loadingFileContent.value = false
+
+  // Reopen the repository files modal with the same repository
+  showFilesModal.value = true
+  // The repositoryFiles and selectedRepository are already preserved
+}
+
+// Close ALL modals
+const closeAllModals = () => {
+  showFilesModal.value = false
+  showFileContentModal.value = false
+  selectedRepository.value = ''
+  repositoryFiles.value = []
+  selectedFileContent.value = ''
+  selectedFileName.value = ''
+  loadingFiles.value = false
+  loadingFileContent.value = false
+}
+
+// Download file
+const downloadFile = async (file: RepositoryFile) => {
+  try {
+    if (file.downloadUrl) {
+      // Create a temporary link to download the file from your backend
+      const link = document.createElement('a')
+      link.href = file.downloadUrl
+      link.download = file.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } else {
+      // Fallback: create a blob with mock content
+      const content = `# ${file.name}\n\nThis is a mock ${file.name} file.\n\nGenerated on: ${new Date().toLocaleString()}`
+      const blob = new Blob([content], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = url
+      link.download = file.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      URL.revokeObjectURL(url)
+    }
+  } catch (error) {
+    console.error('Failed to download file:', error)
+    alert('Failed to download file. Please try again.')
+  }
+}
+
+// View file content
+const viewFileContent = async (file: RepositoryFile) => {
+  try {
+    loadingFileContent.value = true
+    selectedFileName.value = file.name
+    showFileContentModal.value = true
+    showFilesModal.value = false // Just hide the modal, don't clear the data
+    let content = ''
+
+    if (file.downloadUrl) {
+      // Fetch actual content from your backend
+      const response = await axios.get(file.downloadUrl)
+      content = response.data
+    } else {
+      // Fallback: mock content
+      content = `# ${file.name}\n\nThis is a mock ${file.name} file.\n\nGenerated on: ${new Date().toLocaleString()}\n\n## Content\n\nThis file contains information about changes made to the main branch.`
+    }
+
+    selectedFileContent.value = content
+  } catch (error) {
+    console.error('Failed to view file content:', error)
+    alert('Failed to view file content. Please try again.')
+  } finally {
+    loadingFileContent.value = false
+  }
+}
+
 // Format date helper function
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return 'Not available'
@@ -584,20 +917,5 @@ const formatDate = (dateString: string | undefined): string => {
   }
 }
 
-// Close dropdown when clicking outside
-onMounted(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as HTMLElement
-    if (!target.closest('.repositories-dropdown')) {
-      showRepositories.value = false
-    }
-  }
-
-  document.addEventListener('click', handleClickOutside)
-
-  // Cleanup
-  return () => {
-    document.removeEventListener('click', handleClickOutside)
-  }
-})
+// No outside click handler needed - repositories dropdown only closes when clicking the card itself
 </script>

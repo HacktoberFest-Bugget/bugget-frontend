@@ -1,5 +1,166 @@
 @import 'tailwindcss';
+@import '@tailwindcss/typography';
 
 @theme {
   --color-tarkhna: #7c3aed;
+}
+
+/* GitHub-style markdown rendering for file content modal */
+.prose-invert {
+  color: #d1d5db;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* Headings with proper spacing and hierarchy */
+.prose-invert h1 {
+  color: #ffffff;
+  font-size: 2em;
+  font-weight: 600;
+  margin: 24px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.prose-invert h2 {
+  color: #ffffff;
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 24px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.prose-invert h3 {
+  color: #ffffff;
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+}
+
+.prose-invert h4 {
+  color: #ffffff;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+}
+
+.prose-invert h5,
+.prose-invert h6 {
+  color: #ffffff;
+  font-size: 1em;
+  font-weight: 600;
+  margin: 12px 0 8px 0;
+}
+
+/* Paragraphs with proper spacing */
+.prose-invert p {
+  margin: 16px 0;
+  line-height: 1.6;
+}
+
+/* Lists with proper indentation and spacing */
+.prose-invert ul,
+.prose-invert ol {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.prose-invert li {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.prose-invert ul li {
+  list-style-type: disc;
+}
+
+.prose-invert ol li {
+  list-style-type: decimal;
+}
+
+/* Strong/bold text */
+.prose-invert strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Code blocks with GitHub-style styling */
+.prose-invert pre {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.prose-invert code {
+  background-color: #374151;
+  color: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.prose-invert pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+/* Blockquotes */
+.prose-invert blockquote {
+  border-left: 4px solid #374151;
+  background-color: #1f2937;
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+  color: #9ca3af;
+}
+
+/* Horizontal rules */
+.prose-invert hr {
+  border: none;
+  border-top: 1px solid #374151;
+  margin: 24px 0;
+}
+
+/* Links */
+.prose-invert a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.prose-invert a:hover {
+  text-decoration: underline;
+}
+
+/* Tables */
+.prose-invert table {
+  border-collapse: collapse;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.prose-invert th,
+.prose-invert td {
+  border: 1px solid #374151;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.prose-invert th {
+  background-color: #1f2937;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.prose-invert td {
+  background-color: #111827;
 }
