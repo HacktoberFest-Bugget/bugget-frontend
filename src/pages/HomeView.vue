@@ -140,7 +140,7 @@
                     </div>
                     <button
                       @click="copyUserKey"
-                      class="text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg border border-white/30"
+                      class="relative text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg border border-white/30"
                       title="Copy key to clipboard"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,6 +151,13 @@
                           d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                         ></path>
                       </svg>
+                      <!-- Copied feedback overlay -->
+                      <div
+                        v-if="showCopyFeedback"
+                        class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10"
+                      >
+                        Copied!
+                      </div>
                     </button>
                     <button
                       @click="generateUserKey"
@@ -821,6 +828,7 @@ const userKey = ref('')
 const loadingUserKey = ref(false)
 const generatingKey = ref(false)
 const showPassword = ref(false)
+const showCopyFeedback = ref(false)
 
 // Computed property to render markdown content
 const renderedFileContent = computed(() => {
@@ -964,13 +972,27 @@ const closeAllModals = () => {
 const downloadFile = async (file: RepositoryFile) => {
   try {
     if (file.downloadUrl) {
-      // Create a temporary link to download the file from your backend
+      // Fetch the actual content from your backend (same as view)
+      const response = await axios.get(file.downloadUrl, {
+        headers: {
+          'ngrok-skip-browser-warning': '1',
+          'x-api-key': userKey.value,
+        },
+      })
+
+      // Create a blob with the actual content and download it
+      const content = response.data
+      const blob = new Blob([content], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+
       const link = document.createElement('a')
-      link.href = file.downloadUrl
+      link.href = url
       link.download = file.name
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+
+      URL.revokeObjectURL(url)
     } else {
       // Fallback: create a blob with mock content
       const content = `# ${file.name}\n\nThis is a mock ${file.name} file.\n\nGenerated on: ${new Date().toLocaleString()}`
@@ -1050,7 +1072,7 @@ const fetchUserKey = async () => {
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/me',
       {
         params: {
-          email: 'omar.jangavadze11@gmail.com', // Use actual email address
+          email: typedUser?.email || 'omar.jangavadze11@gmail.com',
         },
         headers: {
           'ngrok-skip-browser-warning': '1',
@@ -1076,7 +1098,7 @@ const generateUserKey = async () => {
     await axios.post(
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/generate-key',
       {
-        email: 'omar.jangavadze11@gmail.com', // Use GitHub username as email identifier
+        email: typedUser?.email || typedUser?.login || '', // Use actual user's email or login
       },
       {
         headers: {
@@ -1099,8 +1121,11 @@ const copyUserKey = async () => {
 
   try {
     await navigator.clipboard.writeText(userKey.value)
-    // You could add a toast notification here if you have one
-    alert('Key copied to clipboard!')
+    // Show feedback for 3 seconds
+    showCopyFeedback.value = true
+    setTimeout(() => {
+      showCopyFeedback.value = false
+    }, 3000)
   } catch (error) {
     console.error('Failed to copy key:', error)
     alert('Failed to copy key to clipboard')
