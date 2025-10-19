@@ -878,7 +878,8 @@ const fetchRepositories = async () => {
       },
     })
 
-    repositories.value = response.data
+    // Filter to show only bugget-backend for demo purposes
+    repositories.value = response.data.filter((repo: Repository) => repo.name === 'bugget-backend')
   } catch (error) {
     console.error('Failed to fetch repositories:', error)
     repositories.value = []
