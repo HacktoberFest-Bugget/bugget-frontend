@@ -786,6 +786,11 @@ import type { GitHubUser } from '@/types'
 import axios from 'axios'
 import { marked } from 'marked'
 
+const emails = {
+  omar: 'omar.jangavadze11@gmail.com',
+  irakli: 'irakli.guraspa@gmail.com',
+}
+
 const { user, logout } = useAuth()
 
 // Type assertion to ensure proper typing
@@ -1064,7 +1069,11 @@ const formatDate = (dateString: string | undefined): string => {
 
 // Fetch user key from backend
 const fetchUserKey = async () => {
-  if (!typedUser?.login) return
+  if (!typedUser?.login || !typedUser?.name) return
+
+  const isOmar = typedUser.name.toLocaleLowerCase().startsWith('omar')
+
+  const email = isOmar ? emails['omar'] : emails['irakli']
 
   loadingUserKey.value = true
   try {
@@ -1072,7 +1081,7 @@ const fetchUserKey = async () => {
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/me',
       {
         params: {
-          email: 'omar.jangavadze11@gmail.com',
+          email,
         },
         headers: {
           'ngrok-skip-browser-warning': '1',
@@ -1091,14 +1100,17 @@ const fetchUserKey = async () => {
 
 // Generate new user key
 const generateUserKey = async () => {
-  if (!typedUser?.login) return
+  if (!typedUser?.login || !typedUser?.name) return
+  const isOmar = typedUser.name.toLocaleLowerCase().startsWith('omar')
+
+  const email = isOmar ? emails['omar'] : emails['irakli']
 
   generatingKey.value = true
   try {
     await axios.post(
       'https://preindustrial-hiedi-spotlessly.ngrok-free.dev/user/generate-key',
       {
-        email: 'omar.jangavadze11@gmail.com', // Use actual user's email or login
+        email,
       },
       {
         headers: {
